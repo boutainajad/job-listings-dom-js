@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 4. Handle errors appropriately
         
         try {
-            const response = await fetch('./data.json');
+            const response = await fetch('./data/data.json');
             if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
             allJobs = await response.json();
             saveAllJobs();
