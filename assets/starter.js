@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         const validateJobForm = () => {
             let iValid = true;
-          const company = jobCompanyInput.value.trim();
+        const company = jobCompanyInput.value.trim();
         const position = jobPositionInput.value.trim();
         const contract = jobContractInput.value.trim();
         const location = jobLocationInput.value.trim();
@@ -333,8 +333,19 @@ document.addEventListener('DOMContentLoaded', () => {
      * Renders profile form with saved data
      * @function renderProfileForm
      */ 
-    const renderProfileForm = () => {
-        // TODO: Populate form fields with saved profile data
+   const renderProfileForm = () => {
+
+        if (profileNameInput) {
+            profileNameInput.value = userProfile.name || '';
+        }
+
+        if (profilePositionInput) {
+            profilePositionInput.value = userProfile.position || '';
+        }
+
+        if (userProfile.skills && userProfile.skills.length > 0) {
+            renderProfileSkills();
+        }
     };
 
     /**
@@ -840,8 +851,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Profile events
         // Filter events  
         // Job list events
+
+        profileForm.addEventListener("submit", (e) =>    {
+                e.preventDefault();
+        })
+
+        skillInput.addEventListener("keydown", handleSkillAdd)
     };
 
-    // Start the application
+     // Start the application
     initializeApp();
 });
