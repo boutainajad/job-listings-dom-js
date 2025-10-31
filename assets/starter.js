@@ -20,19 +20,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // ------------------------------------
     // --- GLOBAL VARIABLES ---
     // ------------------------------------
-    
+
     /** @type {Array} All job listings loaded from data.json */
     let allJobs = [];
-    
+
     /** @type {Array} Currently active manual filters */
     let manualFilters = [];
-    
+
     /** @type {Object} User profile data */
     let userProfile = { name: '', position: '', skills: [] };
-    
+
     /** @type {Array} Array of favorite job IDs */
     let favoriteJobIds = [];
-    
+
     // LocalStorage keys
     const PROFILE_STORAGE_KEY = 'jobAppUserProfile';
     const FAVORITES_STORAGE_KEY = 'jobAppFavorites';
@@ -52,11 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const profilePositionInput = document.getElementById('profile-position');
     const skillInput = document.getElementById('skill-input');
     const profileSkillsList = document.getElementById('profile-skills-list');
-    
+
     // DOM Elements - Tabs
     const tabsNav = document.querySelector('.tabs-nav');
     const tabContents = document.querySelectorAll('.tab-content');
-    
+
     // DOM Elements - Favorites
     const favoriteJobsContainer = document.getElementById('favorite-jobs-container');
     const favoritesCount = document.getElementById('favorites-count');
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const manageModalCloseBtn = document.getElementById('modal-close-btn-manage');
     const manageModalTitle = document.getElementById('manage-modal-title');
     const manageJobForm = document.getElementById('manage-job-form');
-    
+
     // DOM Elements - Manage Form Fields
     const jobIdInput = document.getElementById('job-id-input');
     const jobCompanyInput = document.getElementById('job-company');
@@ -104,11 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. If not, fetch from data.json
         // 3. Save to localStorage for persistence
         // 4. Handle errors appropriately
-        
+
         try {
             const response = await fetch('./assets/data/data.json');
             if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
             allJobs = await response.json();
+
             saveAllJobs();
         } catch (error) {
             console.error("Error loading data.json:", error);
@@ -139,6 +140,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Add error class to input
         // 2. Find error span element
         // 3. Display error message
+            input.classList.add('.has-error');
+
+        const errorSpan = input.nextElementSibling;
+
+        if (errorSpan && errorSpan.classList.contains('form-error')) {
+            errorSpan.style.display = "block";
+            errorSpan.textContent = message;
+        }
     };
 
     /**
@@ -150,6 +159,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // TODO: Implement error clearing logic
         // 1. Remove error classes from inputs
         // 2. Clear error messages
+         const inputs = form.querySelectorAll('input, textarea');
+
+        inputs.forEach(input => {
+            input.classList.remove('.has-error');
+
+            const err = input.nextElementSibling;
+            if (err && err.classList.contains('form-error')) {
+                err.textContent = '';
+            }
+        });
+
     };
 
     /**
@@ -158,11 +178,86 @@ document.addEventListener('DOMContentLoaded', () => {
      * @returns {boolean} True if valid, false otherwise
      */
     const validateProfileForm = () => {
+          let isValid = true;
+
+        const name = profileNameInput.value.trim();
+        const position = profilePositionInput.value.trim();
+
+        if (!name) {
+            showError(profileNameInput, 'Le nom complet est requis');
+            isValid = false;
+        } else if (name.length < 3) {
+            showError(profileNameInput, 'Le nom doit contenir au moins 3 caractères');
+            isValid = false;
+        }
+
+        if (!position) {
+            showError(profilePositionInput, 'Le poste souhaité est requis');
+            isValid = false;
+        } else if (position.length < 3) {
+            showError(profilePositionInput, 'Le poste doit contenir au moins 3 caractères');
+            isValid = false;
+        }
+
+        return isValid;
+    };
         // TODO: Implement profile form validation
         // 1. Check required fields
         // 2. Show errors if invalid
         // 3. Return validation result
-        return true;
+    
+        const validateJobForm = () => {
+            let iValid = true;
+          const company = jobCompanyInput.value.trim();
+        const position = jobPositionInput.value.trim();
+        const contract = jobContractInput.value.trim();
+        const location = jobLocationInput.value.trim();
+        const role = jobRoleInput.value.trim();
+        const level = jobLevelInput.value.trim();
+        const skills = jobSkillsInput.value.trim();
+        const description = jobDescriptionInput.value.trim();
+
+        if (!company) {
+            showError(jobCompanyInput, 'Le nom de l\'entreprise est requis');
+            isValid = false;
+        }
+
+        if (!position) {
+            showError(jobPositionInput, 'Le poste est requis');
+            isValid = false;
+        }
+
+        if (!contract) {
+            showError(jobContractInput, 'Le type de contrat est requis');
+            isValid = false;
+        }
+
+        if (!location) {
+            showError(jobLocationInput, 'La localisation est requise');
+            isValid = false;
+        }
+
+        if (!role) {
+            showError(jobRoleInput, 'Le rôle est requis');
+            isValid = false;
+        }
+
+        if (!level) {
+            showError(jobLevelInput, 'Le niveau est requis');
+            isValid = false;
+        }
+
+        if (!skills) {
+            showError(jobSkillsInput, 'Au moins une compétence est requise');
+            isValid = false;
+        }
+
+        if (!description) {
+            showError(jobDescriptionInput, 'La description est requise');
+            isValid = false;
+        }
+
+        return isValid;
     };
 
     /**
@@ -170,13 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
      * @function validateJobForm
      * @returns {boolean} True if valid, false otherwise
      */
-    const validateJobForm = () => {
+
         // TODO: Implement job form validation
         // 1. Validate all required fields
         // 2. Validate URL format for logo
         // 3. Show appropriate error messages
-        return true;
-    };
 
     // ------------------------------------
     // --- PROFILE MANAGEMENT ---
@@ -190,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // TODO: Implement profile saving
     };
 
-    /**
+    /** 
      * Loads user profile from localStorage
      * @function loadProfile
      */
@@ -209,12 +302,37 @@ document.addEventListener('DOMContentLoaded', () => {
         //     <span>${skill}</span>
         //     <button class="profile-skill-remove" aria-label="Remove skill ${skill}">✕</button>
         //  </li>`
+        profileSkillsList.innerHTML= ' '
+        if (!userProfile.skills || userProfile.skills.length === 0) {
+            profileSkillsList.innerHTML = '<li class="empty-message">Aucune compétence ajoutée</li>';
+            return;
+        }
+
+        userProfile.skills.forEach(skill => {
+            const skillItem = document.createElement('li');
+            skillItem.className = 'profile-skill-tag';
+            skillItem.dataset.skill = skill; 
+
+            skillItem.innerHTML = `
+                <span>${skill}</span>
+                <button class="profile-skill-remove" aria-label="Remove skill ${skill}">✕</button>
+            `;
+
+            const removeBtn = skillItem.querySelector('.profile-skill-remove');
+            removeBtn.addEventListener('click', () => {
+                userProfile.skills = userProfile.skills.filter(s => s !== skill);
+                saveProfile(); 
+                renderProfileSkills(); 
+                applyAllFilters(); 
+            });
+            profileSkillsList.appendChild(skillItem);
+        });
     };
 
     /**
      * Renders profile form with saved data
      * @function renderProfileForm
-     */
+     */ 
     const renderProfileForm = () => {
         // TODO: Populate form fields with saved profile data
     };
@@ -243,6 +361,21 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Get skill value
         // 3. Add to profile if not duplicate
         // 4. Re-render skills and apply filters
+
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+           const skill = skillInput.value.trim();
+        if (!skill) return; 
+        if (userProfile.skills.includes(skill)) {
+            alert('Cette compétence existe déjà !');
+            return;
+        }
+            userProfile.skills.push(skill);
+             saveProfile();
+        renderProfileSkills();
+        skillInput.value = '';
+            applyAllFilters(); 
+
     };
 
     /**
@@ -284,6 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     const renderFavoritesCount = () => {
         // TODO: Update favorites count in tab
+         favoritesCount.innerText = `(${favoriteJobIds.length})`;
     };
 
     /**
@@ -295,6 +429,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // 1. Filter jobs by favorite IDs
         // 2. Use createJobCardHTML for each job
         // 3. Show empty message if no favorites
+         let contentHtml = "";
+        if (favoriteJobIds.length === 0) {
+            favoriteJobsContainer.innerHTML = '<p class="job-listings__empty">No jobs favorite found.</p>';
+        } else {
+            for (let i  = 0; i < favoriteJobIds.length; i++) {
+                const objectJob = allJobs.find((item) => item.id === favoriteJobIds[i]);
+                if (objectJob) {
+                    contentHtml += createJobCardHTML(objectJob);
+                }
+            }
+
+            favoriteJobsContainer.innerHTML = contentHtml;
+        }
     };
 
     /**
@@ -308,6 +455,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. Add or remove from favorites array
         // 3. Save to localStorage
         // 4. Update UI
+         // search
+        const indexOfJob = favoriteJobIds.indexOf(jobId);
+
+        if (indexOfJob !== -1) {
+            // suprimer
+            favoriteJobIds.splice(indexOfJob,1);
+       } else {
+            // ajouter
+            favoriteJobIds.push(jobId);
+        }
+
+        renderJobs(allJobs);
+        renderFavoritesCount();
+        renderFavoriteJobs();
     };
 
     // ------------------------------------
@@ -322,17 +483,17 @@ document.addEventListener('DOMContentLoaded', () => {
         tabsNav.addEventListener('click', (e) => {
             const clickedTab = e.target.closest('.tab-item');
             if (!clickedTab) return;
-            
+
             // Update active tab
             tabsNav.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('tab-item--active'));
             clickedTab.classList.add('tab-item--active');
-            
+
             // Show/hide tab content
             const tabId = clickedTab.dataset.tab;
             tabContents.forEach(content => {
                 content.classList.toggle('tab-content--active', content.id === `tab-${tabId}`);
             });
-            
+
             // Load tab-specific content
             if (tabId === 'favorites') renderFavoriteJobs();
             if (tabId === 'manage') renderManageList();
@@ -478,7 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newBadge = isNew ? '<span class="job-card__badge job-card__badge--new">NEW!</span>' : '';
         const featuredBadge = featured ? '<span class="job-card__badge job-card__badge--featured">FEATURED</span>' : '';
         const featuredClass = featured ? 'job-card--featured' : '';
-        
+
         const isFavorite = favoriteJobIds.includes(id);
         const favoriteClass = isFavorite ? 'job-card__favorite-btn--active' : '';
         const favoriteIcon = isFavorite ? '★' : '☆';
@@ -508,6 +669,15 @@ document.addEventListener('DOMContentLoaded', () => {
         jobListingsContainer.innerHTML = jobsToRender.length > 0
             ? jobsToRender.map(createJobCardHTML).join('')
             : '<p class="job-listings__empty">No jobs match your search.</p>';
+
+        const btnFavorites = document.getElementsByClassName("job-card__favorite-btn");
+    
+        for (let i  = 0; i < btnFavorites.length; i++) {
+            btnFavorites[i].addEventListener('click', (e) => {
+                const idJob = Number(e.target.getAttribute("data-job-id"));
+                toggleFavorite(idJob);
+            })
+        }
     };
 
     /**
@@ -542,17 +712,53 @@ document.addEventListener('DOMContentLoaded', () => {
      * Applies all active filters and updates display
      * @function applyAllFilters
      */
+
     const applyAllFilters = () => {
         // TODO: Implement comprehensive filtering
         // 1. Get search term
         // 2. Combine profile skills and manual filters
         // 3. Filter jobs by tags and search term
         // 4. Update all UI components
-    };
+        // console.log(searchInput == null)
+        // searchInput=document.getElementById("")
+        searchInput.addEventListener("input", function () {
+            const searchJob = searchInput.value.toLowerCase();
 
-    // ------------------------------------
+            const resultJobs = [];
+
+            const searchSkills = (skills) => {
+                for (let j = 0; j < skills.length; j++) {
+                    if (skills[j].toLowerCase().includes(searchJob)) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+
+            for (let i = 0; i < allJobs.length; i++) {
+                if (
+                    allJobs[i].company.toLowerCase().includes(searchJob) ||
+                    allJobs[i].position.toLowerCase().includes(searchJob) ||
+                    allJobs[i].location.toLowerCase().includes(searchJob) ||
+                    allJobs[i].role.toLowerCase().includes(searchJob) ||
+                    allJobs[i].contract.toLowerCase().includes(searchJob) ||
+                    searchSkills(allJobs[i].skills)
+                ) {
+                    resultJobs.push(allJobs[i]);
+                }
+            }
+
+            renderJobs(resultJobs);
+
+        })
+    };
+// ------------------------------------
     // --- EVENT HANDLERS ---
     // ------------------------------------
+    clearFiltersBtn.addEventListener("click", function () {
+        handleClear
+        Filters();
+    })
 
     /**
      * Handles clicks on job listings
@@ -581,11 +787,13 @@ document.addEventListener('DOMContentLoaded', () => {
      * @function handleClearFilters
      */
     const handleClearFilters = () => {
+        searchInput.value = "";
+        renderJobs(allJobs);
+    };
         // TODO: Implement filter clearing
         // 1. Clear manual filters array
         // 2. Clear search input
         // 3. Apply filters
-    };
 
     // ------------------------------------
     // --- INITIALIZATION ---
